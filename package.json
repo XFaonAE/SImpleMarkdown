@@ -1,0 +1,18 @@
+{
+    "name": "root",
+    "version": "1.0.0",
+    "author": "XFaonAE",
+    "license": "MIT",
+    "workspaces": [
+        "./packages/parser",
+        "./packages/test"
+    ],
+    "scripts": {
+        "watch": "nexojs watch",
+        "build": "nexojs build"
+    },
+    "devDependencies": {
+        "nexojs": "^1.0.0-dev.10"
+    },
+    "type": "module"
+}

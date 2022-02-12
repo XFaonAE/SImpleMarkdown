@@ -1,0 +1,15 @@
+{
+    "name": "@simple-md-xfaon/parser",
+    "version": "1.0.0",
+    "author": "XFaonAE",
+    "license": "MIT",
+    "main": "./src/Main.js",
+    "type": "module",
+    "exports": {
+        "import": "./src/Main.js",
+        "export": "./src/Main.js"
+    },
+    "dependencies": {
+        "@nexojs/command-line": "^1.0.0-dev.10"
+    }
+}

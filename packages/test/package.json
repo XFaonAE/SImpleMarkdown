@@ -1,0 +1,16 @@
+{
+    "name": "test",
+    "version": "1.0.0",
+    "author": "XFaonAE",
+    "license": "MIT",
+    "main": "./dist/es.mjs",
+    "type": "module",
+    "exports": {
+        "import": "./dist/es.mjs",
+        "export": "./dist/common.cjs"
+    },
+    "dependencies": {
+        "cli-html": "^2.1.8",
+        "@simple-md-xfaon/parser": "*"
+    }
+}
