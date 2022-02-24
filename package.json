@@ -1,18 +1,22 @@
 {
-    "name": "root",
-    "version": "1.0.0",
-    "author": "XFaonAE",
-    "license": "MIT",
-    "workspaces": [
-        "./packages/parser",
-        "./packages/test"
-    ],
-    "scripts": {
-        "watch": "nexojs watch",
-        "build": "nexojs build"
-    },
-    "devDependencies": {
-        "nexojs": "^1.0.0-dev.10"
-    },
-    "type": "module"
+  "name": "simple-md",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XFaonAE/SImpleMarkdown.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/XFaonAE/SImpleMarkdown/issues"
+  },
+  "homepage": "https://github.com/XFaonAE/SImpleMarkdown#readme",
+  "devDependencies": {
+    "typescript": "^4.5.5"
+  }
 }
