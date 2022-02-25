@@ -90,7 +90,7 @@ export class Parser extends EventEmitter {
     }
 
     #err(token: Token, res: string) {
-        console.log(`Error: ${res} \n  at line ${token.line} column ${token.column}\n`);
+        console.log(`\nError: ${res} \n  at line ${token.line} column ${token.column}\n`);
         
         const lineTokens = this.lexer.tokens.filter(t => t.line === token.line).map(tkn => tkn.value);
         console.log(`  ${lineTokens.join('')}${' '.repeat(token.column)}^ ~~~`)
@@ -120,7 +120,8 @@ export class Parser extends EventEmitter {
                 open: false,
                 name: null as Reserved | null,
                 fParam: "",
-                stageArg: 0
+                stageArg: 0,
+                expect: [] as string[]
             },
             parsingLine: 0,
             isComment: false,
@@ -139,11 +140,6 @@ export class Parser extends EventEmitter {
         ].join("\n");
 
         this.lexer.tokens.forEach((token, index) => {
-            console.log("\n" + "DEBUG: LOEX " + index)
-            console.log("\n" + "DEBUG: LOEX " + index)
-            console.log("\n" + "DEBUG: LOEX " + index)
-            console.log("\n" + "DEBUG: LOEX " + index)
-
             if (!state.isComment && !state.string.open && !state.keyword.open && (
                 this.lexer.peek(-1).value === '/'
                 && token.value === '/'
@@ -182,6 +178,37 @@ export class Parser extends EventEmitter {
                 state.keyword.stageArg = 0;
 
                 result += `console.log(__c_kittens__.version);\n`;
+            } else if (!state.keyword.open && token.value === 'K') {
+                state.keyword.open = true;
+                state.keyword.name = null;
+
+                state.keyword.expect = [ "i" ];
+            } else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify(["i"]) && state.keyword.expect.indexOf(token.value) == -1) {
+                this.#err(token, `Unexpected token '${token.value}'`);
+            } else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify(["i"]) && state.keyword.expect.indexOf(token.value) !== -1) {
+                state.keyword.expect = ["t"];
+            } else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify(["t"]) && state.keyword.expect.indexOf(token.value) == -1) {
+                this.#err(token, `Unexpected token '${token.value}'`);
+            } else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify(["t"]) && state.keyword.expect.indexOf(token.value) !== -1) {
+                state.keyword.expect = [":"];
+            } else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify([":"]) && state.keyword.expect.indexOf(token.value) == -1) {
+                this.#err(token, `Unexpected token '${token.value}'`);
+            } else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify([":"]) && state.keyword.expect.indexOf(token.value) !== -1) {
+                state.keyword.expect = ["m"];
+            } else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify([":"]) && state.keyword.expect.indexOf(token.value) == -1) {
+                this.#err(token, `Unexpected token '${token.value}'`);
+            } else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify([":"]) && state.keyword.expect.indexOf(token.value) !== -1) {
+                
+                if (
+                    this.lexer.peek(1)?.value === "m"
+                    && this.lexer.peek(2)?.value === "e"
+                    && this.lexer.peek(3)?.value === "o"
+                    && this.lexer.peek(4)?.value === "w"
+                ) {
+
+                } else {
+                    this.#err(token, `Unexpected method char '${token.value}'`);
+                }
             }
 
             this.printPercent();

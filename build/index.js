@@ -1,4 +1,9 @@
 "use strict";
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -94,7 +99,8 @@ class Parser extends events_1.default {
                 open: false,
                 name: null,
                 fParam: "",
-                stageArg: 0
+                stageArg: 0,
+                expect: []
             },
             parsingLine: 0,
             isComment: false,
@@ -111,11 +117,7 @@ class Parser extends events_1.default {
             `}\n`
         ].join("\n");
         this.lexer.tokens.forEach((token, index) => {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
-            console.log("\n" + "DEBUG: LOEX " + index);
-            console.log("\n" + "DEBUG: LOEX " + index);
-            console.log("\n" + "DEBUG: LOEX " + index);
-            console.log("\n" + "DEBUG: LOEX " + index);
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
             if (!state.isComment && !state.string.open && !state.keyword.open && (this.lexer.peek(-1).value === '/'
                 && token.value === '/')) {
                 state.isComment = true;
@@ -152,6 +154,42 @@ class Parser extends events_1.default {
                 state.keyword.stageArg = 0;
                 result += `console.log(__c_kittens__.version);\n`;
             }
+            else if (!state.keyword.open && token.value === 'K') {
+                state.keyword.open = true;
+                state.keyword.name = null;
+                state.keyword.expect = ["i"];
+            }
+            else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify(["i"]) && state.keyword.expect.indexOf(token.value) == -1) {
+                __classPrivateFieldGet(this, _Parser_instances, "m", _Parser_err).call(this, token, `Unexpected token '${token.value}'`);
+            }
+            else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify(["i"]) && state.keyword.expect.indexOf(token.value) !== -1) {
+                state.keyword.expect = ["t"];
+            }
+            else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify(["t"]) && state.keyword.expect.indexOf(token.value) == -1) {
+                __classPrivateFieldGet(this, _Parser_instances, "m", _Parser_err).call(this, token, `Unexpected token '${token.value}'`);
+            }
+            else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify(["t"]) && state.keyword.expect.indexOf(token.value) !== -1) {
+                state.keyword.expect = [":"];
+            }
+            else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify([":"]) && state.keyword.expect.indexOf(token.value) == -1) {
+                __classPrivateFieldGet(this, _Parser_instances, "m", _Parser_err).call(this, token, `Unexpected token '${token.value}'`);
+            }
+            else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify([":"]) && state.keyword.expect.indexOf(token.value) !== -1) {
+                state.keyword.expect = ["m"];
+            }
+            else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify([":"]) && state.keyword.expect.indexOf(token.value) == -1) {
+                __classPrivateFieldGet(this, _Parser_instances, "m", _Parser_err).call(this, token, `Unexpected token '${token.value}'`);
+            }
+            else if (state.keyword.open && state.keyword.name === null && JSON.stringify(state.keyword.expect) === JSON.stringify([":"]) && state.keyword.expect.indexOf(token.value) !== -1) {
+                if (((_r = this.lexer.peek(1)) === null || _r === void 0 ? void 0 : _r.value) === "m"
+                    && ((_s = this.lexer.peek(2)) === null || _s === void 0 ? void 0 : _s.value) === "e"
+                    && ((_t = this.lexer.peek(3)) === null || _t === void 0 ? void 0 : _t.value) === "o"
+                    && ((_u = this.lexer.peek(4)) === null || _u === void 0 ? void 0 : _u.value) === "w") {
+                }
+                else {
+                    __classPrivateFieldGet(this, _Parser_instances, "m", _Parser_err).call(this, token, `Unexpected method char '${token.value}'`);
+                }
+            }
             this.printPercent();
             this.printPercent();
             this.printPercent();
@@ -165,7 +203,7 @@ class Parser extends events_1.default {
 }
 exports.Parser = Parser;
 _Parser_instances = new WeakSet(), _Parser_err = function _Parser_err(token, res) {
-    console.log(`Error: ${res} \n  at line ${token.line} column ${token.column}\n`);
+    console.log(`\nError: ${res} \n  at line ${token.line} column ${token.column}\n`);
     const lineTokens = this.lexer.tokens.filter(t => t.line === token.line).map(tkn => tkn.value);
     console.log(`  ${lineTokens.join('')}${' '.repeat(token.column)}^ ~~~`);
     console.log(`\nPlease check your source code`);

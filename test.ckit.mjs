@@ -3,4 +3,3 @@ const __c_kittens__ = {
   variables: {},
 }
 console.log(__c_kittens__.version);
-console.log(__c_kittens__.version);
