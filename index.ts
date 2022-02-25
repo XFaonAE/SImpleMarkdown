@@ -95,6 +95,15 @@ export class Parser {
         process.exit(1);
     }
 
+    printPercent() {
+        const progressPercent = Math.floor((this.lexer.cursorIndex / this.lexer.tokens.length) * 100);
+        const doneChar = "#";
+        const todoChar = " ";
+
+        const done = doneChar.repeat((progressPercent * process.stdout.columns / 2) / 100);
+        process.stdout.write(done + " " + progressPercent + "% { CurrentToken = " + this.lexer.cursorIndex + "; MaxTokens = " + this.lexer.tokens.length + " } \r")
+    }
+
     parse(): string {
         let result = "";
 
@@ -105,7 +114,9 @@ export class Parser {
             },
             keyword: {
                 open: false,
-                name: Reserved.WHILE
+                name: null as Reserved | null,
+                fParam: "",
+                stageArg: 0
             },
             parsingLine: 0,
             isComment: false,
@@ -114,8 +125,11 @@ export class Parser {
         }
 
         const comments = [] as string[];
+        let tokenIndex = 0;
 
-        this.lexer.tokens.forEach((token) => {
+        while (tokenIndex < this.lexer.tokens.length - 1) {
+            const token = this.lexer.tokens[tokenIndex];
+
             if (!state.isComment && !state.string.open && !state.keyword.open && (
                 this.lexer.peek(-1).value === '/'
                 && token.value === '/'
@@ -127,13 +141,21 @@ export class Parser {
             } else if (state.isComment && (state.commentLine !== token.line || this.lexer.cursorIndex === this.lexer.tokens.length - 1 || token.value === '\n')) {
                 comments.push(state.comment);
                 state.isComment = false;
+
+                result += `//${state.comment}\n`;
                 state.comment = "";
             }
 
-            this.lexer.cursorIndex++;
-        });
+            if (!state.keyword.open) {
 
-        console.log(comments);
+            }
+
+            this.lexer.cursorIndex++;
+            this.printPercent();
+
+            tokenIndex++;
+        }
+
         return result;
     }
 }

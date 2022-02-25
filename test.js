@@ -1,8 +1,11 @@
 const { Parser } = require(".");
+const fs = require("fs/promises");
+const path = require("path");
 
-const md = new Parser(`Kit::meow("Hello, World!"); // Meow!
-// Uwu
-asdasdadasdasd // Some comment and resss 
-`);
+(async () => {
+    const md = new Parser(await fs.readFile("./test.ckit", "utf8"));
+    const parsed = md.parse();
 
-console.log(md.parse());
+    console.log(parsed);
+    fs.writeFile(path.join(__dirname, "./test.ckit.mjs"), parsed, "utf8");
+})();

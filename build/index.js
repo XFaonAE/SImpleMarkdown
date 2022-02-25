@@ -70,6 +70,13 @@ class Parser {
         _Parser_instances.add(this);
         this.lexer = new Lexer(md);
     }
+    printPercent() {
+        const progressPercent = Math.floor((this.lexer.cursorIndex / this.lexer.tokens.length) * 100);
+        const doneChar = "#";
+        const todoChar = " ";
+        const done = doneChar.repeat((progressPercent * process.stdout.columns / 2) / 100);
+        process.stdout.write(done + " " + progressPercent + "% { CurrentToken = " + this.lexer.cursorIndex + "; MaxTokens = " + this.lexer.tokens.length + " } \r");
+    }
     parse() {
         let result = "";
         const state = {
@@ -79,7 +86,9 @@ class Parser {
             },
             keyword: {
                 open: false,
-                name: Reserved.WHILE
+                name: null,
+                fParam: "",
+                stageArg: 0
             },
             parsingLine: 0,
             isComment: false,
@@ -87,7 +96,9 @@ class Parser {
             comment: ""
         };
         const comments = [];
-        this.lexer.tokens.forEach((token) => {
+        let tokenIndex = 0;
+        while (tokenIndex < this.lexer.tokens.length - 1) {
+            const token = this.lexer.tokens[tokenIndex];
             if (!state.isComment && !state.string.open && !state.keyword.open && (this.lexer.peek(-1).value === '/'
                 && token.value === '/')) {
                 state.isComment = true;
@@ -99,11 +110,15 @@ class Parser {
             else if (state.isComment && (state.commentLine !== token.line || this.lexer.cursorIndex === this.lexer.tokens.length - 1 || token.value === '\n')) {
                 comments.push(state.comment);
                 state.isComment = false;
+                result += `//${state.comment}\n`;
                 state.comment = "";
             }
+            if (!state.keyword.open) {
+            }
             this.lexer.cursorIndex++;
-        });
-        console.log(comments);
+            this.printPercent();
+            tokenIndex++;
+        }
         return result;
     }
 }
