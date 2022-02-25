@@ -70,14 +70,25 @@ export class Parser {
         this.lexer = new Lexer(md);
     }
 
+    #err(token: Token) {
+        console.log(`Error at line: ${token.line} column: ${token.column}`);
+        
+        const lineTokens = this.lexer.tokens.filter(t => t.line === token.line).map(tkn => tkn.value);
+        console.log(`  ${lineTokens.join('')}`)
+
+        console.log(`  ${' '.repeat(token.column)}^ ~~~`);
+    }
+
     parse(): string {
         let result = "";
 
-        let i = 0;
-       this.lexer.tokens.forEach(() => {
-           process.stdout.write(this.lexer.peek(i).value);
-           i++;
-       });
+        this.lexer.tokens.forEach((token) => {
+            if (token.value === 'u' && this.lexer.peek(1).value === 'w' && this.lexer.peek(2).value === 'u') {
+                this.#err(token);
+            }
+            
+            this.lexer.cursorIndex++;
+        });
 
         return result;
     }

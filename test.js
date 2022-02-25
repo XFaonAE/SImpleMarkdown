@@ -6,7 +6,7 @@ const md = new Parser(`# Hello World
 ## H2222
 [link](https://www.google.com)
 Text
-Text [link](https://www.google.com)]
+Text [uwu](https://www.google.com)]
 # Header to [link](https://www.google.com)]`);
 
 console.log(md.parse());
