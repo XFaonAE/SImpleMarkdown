@@ -131,7 +131,12 @@ export class Parser extends EventEmitter {
         const comments = [] as string[];
         let tokenIndex = 0;
         let jumperTokens = 1;
-        let result = "";
+        let result = [
+            `const __c_kittens__ = {`,
+            `  version: "1.0.0-dev.0",`,
+            `  variables: {},`,
+            `}\n`
+        ].join("\n");
 
         this.lexer.tokens.forEach((token, index) => {
             console.log("\n" + "DEBUG: LOEX " + index)
@@ -176,7 +181,7 @@ export class Parser extends EventEmitter {
                 state.keyword.fParam = "";
                 state.keyword.stageArg = 0;
 
-                result += `console.log("Version: Unknown");\n`;
+                result += `console.log(__c_kittens__.version);\n`;
             }
 
             this.printPercent();

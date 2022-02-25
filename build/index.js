@@ -104,7 +104,12 @@ class Parser extends events_1.default {
         const comments = [];
         let tokenIndex = 0;
         let jumperTokens = 1;
-        let result = "";
+        let result = [
+            `const __c_kittens__ = {`,
+            `  version: "1.0.0-dev.0",`,
+            `  variables: {},`,
+            `}\n`
+        ].join("\n");
         this.lexer.tokens.forEach((token, index) => {
             var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
             console.log("\n" + "DEBUG: LOEX " + index);
@@ -145,7 +150,7 @@ class Parser extends events_1.default {
                 state.keyword.name = Reserved.VERSION;
                 state.keyword.fParam = "";
                 state.keyword.stageArg = 0;
-                result += `console.log("Version: Unknown");\n`;
+                result += `console.log(__c_kittens__.version);\n`;
             }
             this.printPercent();
             this.printPercent();
