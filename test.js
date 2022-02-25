@@ -4,8 +4,17 @@ const path = require("path");
 
 (async () => {
     const md = new Parser(await fs.readFile("./test.ckit", "utf8"));
-    const parsed = md.parse();
+    fs.writeFile("./test.ckit.mjs", "");
+    
+    let res = "";
 
-    console.log(parsed);
-    fs.writeFile(path.join(__dirname, "./test.ckit.mjs"), parsed, "utf8");
+    md.on('write', (strs) => {
+        // Append to a file
+        res += strs;
+    });
+
+    const parsed = md.parse();
+    console.log("\n" + parsed);
+
+    fs.writeFile("./test.ckit.mjs", res);
 })();

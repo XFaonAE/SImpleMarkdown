@@ -1,3 +1,5 @@
+import EventEmitter from "events";
+
 export interface Token {
     value: string;
     line: number;
@@ -71,6 +73,7 @@ enum Reserved {
     INT = 'NumberUwU',
     STRING = 'StringUwU',
     BOOLEAN = 'BooleanUwU',
+    VERSION = "VERSION"
 }
 
 enum DefaultClasses {
@@ -78,10 +81,11 @@ enum DefaultClasses {
     SystemCat
 }
 
-export class Parser {
+export class Parser extends EventEmitter {
     lexer: Lexer;
 
     constructor(md: string) {
+        super();
         this.lexer = new Lexer(md);
     }
 
@@ -100,13 +104,13 @@ export class Parser {
         const doneChar = "#";
         const todoChar = " ";
 
-        const done = doneChar.repeat((progressPercent * process.stdout.columns / 2) / 100);
-        process.stdout.write(done + " " + progressPercent + "% { CurrentToken = " + this.lexer.cursorIndex + "; MaxTokens = " + this.lexer.tokens.length + " } \r")
+        const done = /* doneChar.repeat((progressPercent * process.stdout.columns / 2) / 100) */ "";
+        const notDone = /* todoChar.repeat((process.stdout.columns / 2) - (progressPercent * process.stdout.columns / 2) / 100); */ ""
+
+        process.stdout.write(done + notDone + " " + progressPercent + "% { CurrentToken = " + this.lexer.cursorIndex + "; MaxTokens = " + this.lexer.tokens.length + " } \r")
     }
 
     parse(): string {
-        let result = "";
-
         const state = {
             string: {
                 open: false,
@@ -126,9 +130,14 @@ export class Parser {
 
         const comments = [] as string[];
         let tokenIndex = 0;
+        let jumperTokens = 1;
+        let result = "";
 
-        while (tokenIndex < this.lexer.tokens.length - 1) {
-            const token = this.lexer.tokens[tokenIndex];
+        this.lexer.tokens.forEach((token, index) => {
+            console.log("\n" + "DEBUG: LOEX " + index)
+            console.log("\n" + "DEBUG: LOEX " + index)
+            console.log("\n" + "DEBUG: LOEX " + index)
+            console.log("\n" + "DEBUG: LOEX " + index)
 
             if (!state.isComment && !state.string.open && !state.keyword.open && (
                 this.lexer.peek(-1).value === '/'
@@ -144,18 +153,41 @@ export class Parser {
 
                 result += `//${state.comment}\n`;
                 state.comment = "";
+            } else if (
+                !state.keyword.open 
+                && this.lexer.peek(-14)?.value === "V" 
+                && this.lexer.peek(-13)?.value === "e" 
+                && this.lexer.peek(-12)?.value === "r"
+                && this.lexer.peek(-11)?.value === "s"
+                && this.lexer.peek(-10)?.value === "i"
+                && this.lexer.peek(-9)?.value === "o"
+                && this.lexer.peek(-8)?.value === "n"
+                && this.lexer.peek(-7)?.value === ":"
+                && this.lexer.peek(-6)?.value === ":"
+                && this.lexer.peek(-5)?.value === "l"
+                && this.lexer.peek(-4)?.value === "o"
+                && this.lexer.peek(-3)?.value === "g"
+                && this.lexer.peek(-2)?.value === "("
+                && this.lexer.peek(-1)?.value === ")"
+                && this.lexer.peek(0)?.value === ";"
+            ) {
+                state.keyword.open = false;
+                state.keyword.name = Reserved.VERSION;
+                state.keyword.fParam = "";
+                state.keyword.stageArg = 0;
+
+                result += `console.log("Version: Unknown");\n`;
             }
 
-            if (!state.keyword.open) {
-
-            }
-
-            this.lexer.cursorIndex++;
             this.printPercent();
+            this.printPercent();
+            this.printPercent();
+            this.printPercent();
+            this.lexer.cursorIndex++;
+        });
 
-            tokenIndex++;
-        }
-
-        return result;
+        console.log("\n" + result)
+        this.emit('write', result);
+        return ">> DONE";
     }
 }
