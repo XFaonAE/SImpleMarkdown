@@ -14,7 +14,7 @@ export class Lexer {
 
     constructor(contents: string) {
         this.raw = contents.replace(/\r\n/g, "\n");
-        const chars = this.raw.split("");
+        const chars = (this.raw + '\n').split("");
         let currentLine = 0;
         let currentChar = 0;
 
@@ -63,6 +63,21 @@ export class Lexer {
     }
 }
 
+enum Reserved {
+    IF = 'When',
+    ELSE = 'OtherWise',
+    WHILE = 'KeepDoing',
+    ELSEIF = 'OtherWiseIf',
+    INT = 'NumberUwU',
+    STRING = 'StringUwU',
+    BOOLEAN = 'BooleanUwU',
+}
+
+enum DefaultClasses {
+    Kit,
+    SystemCat
+}
+
 export class Parser {
     lexer: Lexer;
 
@@ -70,26 +85,55 @@ export class Parser {
         this.lexer = new Lexer(md);
     }
 
-    #err(token: Token) {
-        console.log(`Error at line: ${token.line} column: ${token.column}`);
+    #err(token: Token, res: string) {
+        console.log(`Error: ${res} \n  at line ${token.line} column ${token.column}\n`);
         
         const lineTokens = this.lexer.tokens.filter(t => t.line === token.line).map(tkn => tkn.value);
-        console.log(`  ${lineTokens.join('')}`)
+        console.log(`  ${lineTokens.join('')}${' '.repeat(token.column)}^ ~~~`)
 
-        console.log(`  ${' '.repeat(token.column)}^ ~~~`);
+        console.log(`\nPlease check your source code`);
+        process.exit(1);
     }
 
     parse(): string {
         let result = "";
 
+        const state = {
+            string: {
+                open: false,
+                value: ""
+            },
+            keyword: {
+                open: false,
+                name: Reserved.WHILE
+            },
+            parsingLine: 0,
+            isComment: false,
+            commentLine: 0,
+            comment: ""
+        }
+
+        const comments = [] as string[];
+
         this.lexer.tokens.forEach((token) => {
-            if (token.value === 'u' && this.lexer.peek(1).value === 'w' && this.lexer.peek(2).value === 'u') {
-                this.#err(token);
+            if (!state.isComment && !state.string.open && !state.keyword.open && (
+                this.lexer.peek(-1).value === '/'
+                && token.value === '/'
+            )) {
+                state.isComment = true;
+                state.commentLine = token.line;
+            } else if (state.isComment && state.commentLine === token.line &&  this.lexer.cursorIndex !== this.lexer.tokens.length - 1 && token.value !== '\n') {
+                state.comment += token.value;
+            } else if (state.isComment && (state.commentLine !== token.line || this.lexer.cursorIndex === this.lexer.tokens.length - 1 || token.value === '\n')) {
+                comments.push(state.comment);
+                state.isComment = false;
+                state.comment = "";
             }
-            
+
             this.lexer.cursorIndex++;
         });
 
+        console.log(comments);
         return result;
     }
 }
